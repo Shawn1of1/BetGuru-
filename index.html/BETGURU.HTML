@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OddGuru - Betting Tips and User Registration</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="header">
+        <h1>OddGuru</h1>
+        <p>Your ultimate guide to smart betting</p>
+    </div>
+
+    <div class="container">
+        <!-- User Registration Form -->
+        <form id="registration-form">
+            <h2>Create an Account</h2>
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="phone">Phone Number:</label>
+            <input type="tel" id="phone" name="phone" required>
+
+            <label for="gender">Gender:</label>
+            <select id="gender" name="gender" required>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <label for="age">Age:</label>
+            <input type="number" id="age" name="age" required>
+
+            <button type="submit">Create Account</button>
+        </form>
+
+        <!-- Betting Tips Section -->
+        <div id="betting-tips">
+            <h2>Betting Tips and Opportunities</h2>
+            <!-- Betting tips will be dynamically added here -->
+        </div>
+
+        <!-- Starting Line-ups and Substitutes Section -->
+        <div id="lineups">
+            <h2>Starting Line-ups & Substitutes</h2>
+            <!-- Line-ups and substitutes will be dynamically added here -->
+        </div>
+
+        <!-- Rare Markets Section -->
+        <div id="rare-markets">
+            <h2>Rare Markets and Opportunities</h2>
+            <p>Explore less common betting markets that offer great value and higher chances of winning.</p>
+            <!-- Rare markets will be dynamically added here -->
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('registration-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                gender: document.getElementById('gender').value,
+                age: document.getElementById('age').value
+            };
+
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    alert('Account created successfully!');
+                } else {
+                    alert('Error creating account. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+
+        async function fetchBettingSlips() {
+            try {
+                const response = await fetch('/betting-tips');
+                const data = await response.json();
+                displayBettingSlips(data.slips);
+            } catch (error) {
+                console.error('Error fetching betting slips:', error);
+            }
+        }
+
+        function displayBettingSlips(slips) {
+            const bettingTipsDiv = document.getElementById('betting-tips');
+            bettingTipsDiv.innerHTML = '';
+
+            slips.forEach((slip, index) => {
+                const slipDiv = document.createElement('div');
+                slipDiv.className = 'betting-slip';
+                slipDiv.innerHTML = `<h2>Betting Slip ${index + 1}</h2><ul>${slip.map(outcome => `<li>${outcome.match}: ${outcome.name} - ${outcome.price}</li>`).join('')}</ul>`;
+                bettingTipsDiv.appendChild(slipDiv);
+            });
+        }
+
+        async function fetchLineups() {
+            try {
+                const response = await fetch('/lineups');
+                const data = await response.json();
+                displayLineups(data.lineups);
+            } catch (error) {
+                console.error('Error fetching lineups:', error);
+            }
+        }
+
+        function displayLineups(lineups) {
+            const lineupsDiv = document.getElementById('lineups');
+            lineupsDiv.innerHTML = '';
+
+            lineups.forEach((team) => {
+                const teamDiv = document.createElement('div');
+                teamDiv.className = 'team';
+                teamDiv.innerHTML = `<h3>${team.teamName}</h3><p>Starting Line-up: ${team.starting.join(', ')}</p><p>Substitutes: ${team.substitutes.join(', ')}</p>`;
+                lineupsDiv.appendChild(teamDiv);
+            });
+        }
+
+        async function fetchRareMarkets() {
+            try {
+                const response = await fetch('/rare-markets');
+                const data = await response.json();
+                displayRareMarkets(data.markets);
+            } catch (error) {
+                console.error('Error fetching rare markets:', error);
+            }
+        }
+
+        function displayRareMarkets(markets) {
+            const marketsDiv = document.getElementById('rare-markets');
+            marketsDiv.innerHTML = '';
+
+            markets.forEach((market, index) => {
+                const marketDiv = document.createElement('div');
+                marketDiv.className = 'rare-market';
+                marketDiv.innerHTML = `<h2>Market ${index + 1}</h2><ul>${market.map(outcome => `<li>${outcome.description} - ${outcome.price}</li>`).join('')}</ul>`;
+                marketsDiv.appendChild(marketDiv);
+            });
+        }
+
+        // Call the functions on page load
+        fetchBettingSlips();
+        fetchLineups();
+        fetchRareMarkets();
+    </script>
+</body>
+</html>
